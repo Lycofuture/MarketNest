@@ -35,10 +35,13 @@ jobs:
           tag_name:  v.iptest
           append_body: false
           generate_release_notes: true
+          overwrite: true
           
     - run: |
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add iptest/init.csv
-        git commit -m "csv update"
-        git push
+        if ! git diff --cached --quiet; then
+          git commit -m "csv update"
+          git push
+        fi
