@@ -25,17 +25,15 @@ jobs:
         node  convert.js init.csv ./ipfofa
         rm -rf node_modules detected_ip.csv extraction_ip.txt locations.json
         tar --exclude='./*/*' -czf iptest.tar.gz ./*
-        ls -a
 
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
           name: iptest工具
-          files: iptest.tar.gz
+          files: iptest/iptest.tar.gz
           tag_name:  v.iptest
           append_body: false
           generate_release_notes: true
-          overwrite: true
           
     - run: |
         git config user.name "github-actions[bot]"
