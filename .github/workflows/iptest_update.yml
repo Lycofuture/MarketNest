@@ -20,9 +20,11 @@ jobs:
 
     - name: build 
       run: |
-        node iptest/convert.js iptest/init.csv ./iptest/ipfofa
-        tar --exclude='./iptest/*/*' -czf iptest.tar.gz ./iptest/*
-
+        cd iptest
+        npm i
+        node  convert.js init.csv ./ipfofa
+        rm -rf node_modules detected_ip.csv extraction_ip.txt locations.json
+        tar --exclude='./*/*' -czf iptest.tar.gz ./*
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
