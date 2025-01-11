@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@maxmind/geoip2-node": "^5.0.0"
+  }
+}
