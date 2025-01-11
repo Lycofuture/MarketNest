@@ -75,11 +75,11 @@ const mergeCsvFiles = (csvFiles, outputFile) => {
   }
 };
 
-// 查找指定文件夹中的所有 CSV 文件
-const findCsvFilesInDirectory = (directoryPath) => {
+// 查找指定文件夹中的所有 CSV 和 XLSX 文件
+const findFilesInDirectory = (directoryPath) => {
   try {
     const files = fs.readdirSync(directoryPath);
-    return files.filter(file => path.extname(file).toLowerCase() === '.csv')
+    return files.filter(file => ['.csv', '.xlsx'].includes(path.extname(file).toLowerCase()))
                 .map(file => path.join(directoryPath, file));
   } catch (error) {
     console.error(`读取目录时出错: ${error.message}`);
@@ -93,8 +93,17 @@ const csvFiles = inputPaths.flatMap((inputPath) => {
   const isDirectory = fs.lstatSync(inputPath).isDirectory();
 
   if (isDirectory) {
-    // 查找目录中的所有 CSV 文件
-    return findCsvFilesInDirectory(inputPath);
+    // 查找目录中的所有 CSV 和 XLSX 文件
+    return findFilesInDirectory(inputPath).map(file => {
+      const fileExt = path.extname(file).toLowerCase();
+      if (fileExt === '.xlsx') {
+        return convertXlsxToCsv(file);
+      } else if (fileExt === '.csv') {
+        return file;
+      } else {
+        return null;
+      }
+    }).filter(Boolean);
   } else if (ext === '.xlsx') {
     // 转换 XLSX 为 CSV
     return convertXlsxToCsv(inputPath);
