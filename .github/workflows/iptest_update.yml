@@ -24,7 +24,7 @@ jobs:
         npm i
         node  convert.js init.csv ./ipfofa
         rm -rf node_modules detected_ip.csv extraction_ip.txt locations.json
-        tar --exclude='./*/*' -czf iptest.tar.gz ./*
+        find . -type f | tar -czvf iptest.tar.gz -T -
 
     - name: Release
       uses: softprops/action-gh-release@v2
