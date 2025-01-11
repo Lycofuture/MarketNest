@@ -24,13 +24,13 @@ jobs:
         npm i
         node  convert.js init.csv ./ipfofa
         rm -rf node_modules detected_ip.csv extraction_ip.txt locations.json
-        tar -czvf iptest.tar.gz -C . $(find . -maxdepth 1 -type f)
+        tar -czvf ../iptest.tar.gz $(find . -maxdepth 1 -type f)
 
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
           name: iptest工具
-          files: iptest/iptest.tar.gz
+          files: iptest.tar.gz
           tag_name:  v.iptest
           append_body: false
           generate_release_notes: true
