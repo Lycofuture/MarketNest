@@ -23,7 +23,7 @@ jobs:
         cd iptest
         npm i
         node  convert.js init.csv ./ipfofa
-        rm -rf node_modules detected_ip.csv extraction_ip.txt locations.json
+        rm -rf node_modules detected_ip.csv extraction_ip.txt locations.json iptest ipfofa
         tar --no-recursion -czvf iptest.tar.gz *
 
     - name: Release
