@@ -14,8 +14,8 @@ const txtFilegeo = path.resolve(__dirname, 'ip.txt');
 // 地理位置
 const geoip = path.resolve(__dirname, 'GeoLite2-Country.mmdb');
 // 提取列
-let ip = 'IP地址'
-let port = '端口'
+const ip = 'IP地址'
+const port = '端口'
 const speedtestresult = '下载速度'
 const datacenter = '数据中心';
 async function extractIpAndPort() {
@@ -44,22 +44,38 @@ async function extractIpAndPort() {
     // 读取 GeoLite2 数据库
     const dbBuffer = await fs.promises.readFile(geoip);
     const reader = maxmind.Reader.openBuffer(dbBuffer);
+    const countryCounts = {};
     // 提取 IP 和端口
     const result = lines.slice(1) // 去掉表头
       .map(line => line.split(',')) // 按逗号分割每一行
       .filter(fields => fields.length > Math.max(ipIndex, portIndex, speedIndex, datacenterIndex)) // 确保有足够的列
       .filter(fields => {
         const speed = parseFloat(fields[speedIndex].replace(' kB/s', ''));
-        const dc = fields[datacenterIndex];
-        return speed > 0 && (dc === 'FUK' || dc === 'OKA' || dc === 'KIX' || dc === 'NRT'); // 过滤下载速度大于 0 kB/s 的记录
+        // const dc = fields[datacenterIndex];
+        return speed > 0 // && (dc === 'FUK' || dc === 'OKA' || dc === 'KIX' || dc === 'NRT'); // 过滤下载速度大于 0 kB/s 的记录
       })
       .map(fields => {
-        ip = fields[ipIndex];
-        port = fields[portIndex];
+        const ip = fields[ipIndex];
+        const port = fields[portIndex];
         const data = reader.country(ip);
         // 获取中文名称和国家代码
         const country = data.country.names['zh-CN'] || '未知';
-        return `${ip}:${port}#${country}`;
+        if (!countryCounts[country]) {
+          countryCounts[country] = 0;
+        }
+        // 每个国家提取5个ip
+        if (countryCounts[country] < 5) {
+          countryCounts[country] += 1;
+          return `${ip}:${port}#${country}`;
+        }
+        return null;
+      })
+      .filter(ip => ip !== null)
+      // 排序
+      .sort((a, b) => {
+        const countryA = a.split('#')[1];
+        const countryB = b.split('#')[1];
+        return countryA.localeCompare(countryB);
       })
       .join('\n'); // 合并成多行字符串
 
