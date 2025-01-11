@@ -9,7 +9,7 @@ if (process.argv.length < 4) {
 }
 
 const outputFilePath = process.argv[2];
-const inputFiles = process.argv.slice(3);
+const inputPaths = process.argv.slice(3);
 
 // 将 XLSX 文件转换为 CSV 文件
 const convertXlsxToCsv = (xlsxFilePath) => {
@@ -75,17 +75,34 @@ const mergeCsvFiles = (csvFiles, outputFile) => {
   }
 };
 
+// 查找指定文件夹中的所有 CSV 文件
+const findCsvFilesInDirectory = (directoryPath) => {
+  try {
+    const files = fs.readdirSync(directoryPath);
+    return files.filter(file => path.extname(file).toLowerCase() === '.csv')
+                .map(file => path.join(directoryPath, file));
+  } catch (error) {
+    console.error(`读取目录时出错: ${error.message}`);
+    process.exit(1);
+  }
+};
+
 // 主逻辑：遍历输入文件并处理
-const csvFiles = inputFiles.map((file) => {
-  const ext = path.extname(file).toLowerCase();
-  if (ext === '.xlsx') {
+const csvFiles = inputPaths.flatMap((inputPath) => {
+  const ext = path.extname(inputPath).toLowerCase();
+  const isDirectory = fs.lstatSync(inputPath).isDirectory();
+
+  if (isDirectory) {
+    // 查找目录中的所有 CSV 文件
+    return findCsvFilesInDirectory(inputPath);
+  } else if (ext === '.xlsx') {
     // 转换 XLSX 为 CSV
-    return convertXlsxToCsv(file);
+    return convertXlsxToCsv(inputPath);
   } else if (ext === '.csv') {
     // 直接使用 CSV 文件
-    return file;
+    return inputPath;
   } else {
-    console.warn(`不支持的文件格式，跳过: ${file}`);
+    console.warn(`不支持的文件格式，跳过: ${inputPath}`);
     return null;
   }
 }).filter(Boolean); // 过滤掉不支持的文件
