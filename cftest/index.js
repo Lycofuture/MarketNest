@@ -8,14 +8,16 @@ const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 输入 CSV 文件路径
-const csvFilePath = path.resolve(__dirname, 'result.csv');
+const csvFilePath = path.resolve(__dirname, 'detected_ip.csv');
 // 输出 TXT 文件路径
 const txtFilegeo = path.resolve(__dirname, 'ip.txt');
 // 地理位置
 const geoip = path.resolve(__dirname, 'GeoLite2-Country.mmdb');
 // 提取列
-let ip = 'IP 地址'
-const speedtestresult = '下载速度 (MB/s)'
+const ip = 'IP地址'
+const port = '端口'
+const speedtestresult = '下载速度'
+const datacenter = '数据中心';
 async function extractIpAndPort() {
   try {
     // 读取 CSV 文件内容
@@ -30,12 +32,15 @@ async function extractIpAndPort() {
     // 获取表头
     const headers = lines[0].split(',');
     const ipIndex = headers.indexOf(ip);
-    const portIndex = headers.indexOf(speedtestresult);
+    const portIndex = headers.indexOf(port);
+    const speedIndex = headers.indexOf(speedtestresult);
+    const datacenterIndex = headers.indexOf(datacenter);
 
-    if (ipIndex === -1 || portIndex === -1) {
-      throw new Error(`CSV 文件缺少 ${ip} 或 ${speedtestresult} 列`);
+    if (ipIndex === -1 || portIndex === -1 || datacenterIndex === -1) {
+      throw new Error(`CSV 文件缺少 ${ip}、${port} 或 ${datacenter} 列`);
     }
 
+    // 提取 IP 和端口
     // 读取 GeoLite2 数据库
     const dbBuffer = await fs.promises.readFile(geoip);
     const reader = maxmind.Reader.openBuffer(dbBuffer);
@@ -43,13 +48,15 @@ async function extractIpAndPort() {
     // 提取 IP 和端口
     const result = lines.slice(1) // 去掉表头
       .map(line => line.split(',')) // 按逗号分割每一行
-      .filter(fields => fields.length > Math.max(ipIndex, portIndex)) // 确保有足够的列
+      .filter(fields => fields.length > Math.max(ipIndex, portIndex, speedIndex, datacenterIndex)) // 确保有足够的列
       .filter(fields => {
-        const speed = parseFloat(fields[portIndex].replace(' kB/s', ''));
-        return speed > 0; // 过滤下载速度大于 0 kB/s 的记录
+        const speed = parseFloat(fields[speedIndex].replace(' kB/s', ''));
+        // const dc = fields[datacenterIndex];
+        return speed > 0 // && (dc === 'FUK' || dc === 'OKA' || dc === 'KIX' || dc === 'NRT'); // 过滤下载速度大于 0 kB/s 的记录
       })
       .map(fields => {
-        ip = fields[ipIndex];
+        const ip = fields[ipIndex];
+        const port = fields[portIndex];
         const data = reader.country(ip);
         // 获取中文名称和国家代码
         const country = data.country.names['zh-CN'] || '未知';
@@ -59,7 +66,7 @@ async function extractIpAndPort() {
         // 每个国家提取5个ip
         if (countryCounts[country] < 5) {
           countryCounts[country] += 1;
-          return `${ip}:8443#${country}`;
+          return `${ip}:${port}#${country}`;
         }
         return null;
       })
