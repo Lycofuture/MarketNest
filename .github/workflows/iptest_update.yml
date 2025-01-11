@@ -34,6 +34,8 @@ jobs:
           tag_name: v.iptest
           append_body: false
           generate_release_notes: true
+          body: |
+            使用教程请查看 https://github.com/Lycofuture/MarketNest/blob/main/iptest/README.md
           
     - run: |
         git config user.name "github-actions[bot]"
