@@ -19,7 +19,9 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: build 
-      run: tar --exclude='./iptest/*/*' -czf iptest.tar.gz ./iptest/*
+      run: |
+        node iptest/convert.js iptest/init.csv ./iptest/ipfofa
+        tar --exclude='./iptest/*/*' -czf iptest.tar.gz ./iptest/*
 
     - name: Release
       uses: softprops/action-gh-release@v2
