@@ -24,7 +24,7 @@ jobs:
         npm i
         node  convert.js init.csv ./ipfofa
         rm -rf node_modules detected_ip.csv extraction_ip.txt locations.json
-        find . -maxdepth 1 -type f -exec tar -czvf iptest.tar.gz {} +
+        tar -czvf iptest.tar.gz -C . $(find . -maxdepth 1 -type f)
 
     - name: Release
       uses: softprops/action-gh-release@v2
