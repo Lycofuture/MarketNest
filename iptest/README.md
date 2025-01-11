@@ -47,5 +47,11 @@ node detected.js
 - init.csv 为输出文件名
 
 ```bash
-node vsc.js init.csv 文件.csv 文件2.xlsx
+node convert.js init.csv 文件.csv 文件2.xlsx
+```
+
+也可以指定目录合并
+
+```bash
+node convert.js init.csv ./ipfofa
 ```
