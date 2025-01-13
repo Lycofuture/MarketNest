@@ -50,9 +50,13 @@ async function extractIpAndPort() {
       .map(line => line.split(',')) // 按逗号分割每一行
       .filter(fields => fields.length > Math.max(ipIndex, portIndex, speedIndex, datacenterIndex)) // 确保有足够的列
       .filter(fields => {
-        const speed = parseFloat(fields[speedIndex].replace(' kB/s', ''));
-        // const dc = fields[datacenterIndex];
-        return speed > 0 // && (dc === 'FUK' || dc === 'OKA' || dc === 'KIX' || dc === 'NRT'); // 过滤下载速度大于 0 kB/s 的记录
+        const speedField = fields[speedIndex];
+        if (speedField) {
+          const speed = parseFloat(fields[speedIndex].replace(' kB/s', ''));
+          // const dc = fields[datacenterIndex];
+          return speed > 0 // && (dc === 'FUK' || dc === 'OKA' || dc === 'KIX' || dc === 'NRT'); // 过滤下载速度大于 0 kB/s 的记录
+        }
+        return fields
       })
       .map(fields => {
         const ip = fields[ipIndex];
